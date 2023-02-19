@@ -250,12 +250,12 @@ public class PortManager
                             throw new IllegalArgumentException("PortTickSpeed set to an invalid value!");
                         }
                     }
-                    if (str.startsWith("PortButtonTrigerBlockID"))
-                    {
-                        final String[] spli = str.split(":")[1].split("-");
-                        //PortManager.BUTTON_BLOCK = Integer.parseInt(spli[0]);
-                        PortManager.BUTTON_BLOCK_DATA = Byte.parseByte(spli[1]);
-                    }
+//                    if (str.startsWith("PortButtonTrigerBlockID"))
+//                    {
+//                        final String[] spli = str.split(":")[1].split("-");
+//                        //PortManager.BUTTON_BLOCK = Integer.parseInt(spli[0]);
+//                        PortManager.BUTTON_BLOCK_DATA = Byte.parseByte(spli[1]);
+//                    }
                 }
                 snr.close();
                 VoxelPort.log.info("[VoxelPort] Config loaded");
