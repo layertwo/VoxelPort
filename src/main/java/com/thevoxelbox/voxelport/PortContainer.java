@@ -3,6 +3,7 @@ package com.thevoxelbox.voxelport;
 import java.util.ArrayList;
 
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
@@ -36,7 +37,7 @@ public class PortContainer
         {
             return;
         }
-        if (player.getItemInHand().getTypeId() == 337)
+        if (player.getInventory().getItemInMainHand().getType() == Material.CLAY_BALL)
         {
             return;
         }
@@ -44,16 +45,16 @@ public class PortContainer
         {
             if (port.insideZone(loc))
             {
-                if ((player.getItemInHand().getTypeId() == 266) && player.hasPermission("voxelport.admin"))
+                if ((player.getInventory().getItemInMainHand().getType() == Material.GOLD_INGOT) && player.hasPermission("voxelport.admin"))
                 {
                     port.instaPort(player, true);
                     return;
                 }
                 if (port.ticket())
                 {
-                    final ItemStack i = player.getItemInHand();
+                    final ItemStack i = player.getInventory().getItemInMainHand();
                     // n.turnNpcToPlayer(l);
-                    if (i.getTypeId() == PortManager.TICKETID)
+                    if (i.getType() == PortManager.TICKET)
                     {
                         if (port.instant())
                         {
@@ -107,7 +108,7 @@ public class PortContainer
 
     private void removeTicketFromPlayer(final Player player)
     {
-        final ItemStack itemInHand = player.getItemInHand();
+        final ItemStack itemInHand = player.getInventory().getItemInMainHand();
         final int newAmount = itemInHand.getAmount() - 1;
         if (newAmount == 0)
         {

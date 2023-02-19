@@ -116,52 +116,6 @@ public class HitBlox
     }
 
     /**
-     * Sets the type of the block at the cursor
-     * 
-     * @param type
-     */
-    public void setTargetBlock(final int type)
-    {
-        while ((this.getNextBlock() != null) && (this.getCurBlock().isEmpty()));
-        if (this.getCurBlock() != null)
-        {
-            this.world.getBlockAt(this.targetX, this.targetY, this.targetZ).setTypeId(type);
-        }
-    }
-
-    /**
-     * Returns the block attached to the face at the cursor, or null if out of
-     * range
-     * 
-     * @return Block
-     */
-    public Block getFaceBlock()
-    {
-        while ((this.getNextBlock() != null) && (this.getCurBlock().isEmpty()));
-        if (this.getCurBlock() != null)
-        {
-            return this.getLastBlock();
-        } else
-        {
-            return null;
-        }
-    }
-
-    /**
-     * Sets the type of the block attached to the face at the cursor
-     * 
-     * @param type
-     */
-    public void setFaceBlock(final int type)
-    {
-        while ((this.getNextBlock() != null) && (this.getCurBlock().isEmpty()));
-        if (this.getCurBlock() != null)
-        {
-            this.world.getBlockAt(this.targetX, this.targetY, this.targetZ).setTypeId(type);
-        }
-    }
-
-    /**
      * Returns STEPS forward along line of vision and returns block
      * 
      * @return Block
@@ -228,9 +182,10 @@ public class HitBlox
 
         } while ((this.length <= this.range) && ((this.targetX == this.lastX) && (this.targetY == this.lastY) && (this.targetZ == this.lastZ)));
 
-        if (this.world.getBlockTypeIdAt(this.targetX, this.targetY, this.targetZ) != 0)
+        Block block = this.world.getBlockAt(this.targetX, this.targetY, this.targetZ);
+        if (block != null)
         {
-            return this.world.getBlockAt(this.targetX, this.targetY, this.targetZ);
+            return block;
         }
 
         if ((this.length > this.range) || (this.targetY > 255) || (this.targetY < 0))
@@ -313,19 +268,6 @@ public class HitBlox
     }
 
     /**
-     * Sets current block type id
-     * 
-     * @param type
-     */
-    public void setCurBlock(final int type)
-    {
-        if (this.getCurBlock() != null)
-        {
-            this.world.getBlockAt(this.targetX, this.targetY, this.targetZ).setTypeId(type);
-        }
-    }
-
-    /**
      * Returns the previous block along the line of vision
      * 
      * @return Block
@@ -337,18 +279,5 @@ public class HitBlox
             return null;
         }
         return this.world.getBlockAt(this.lastX, this.lastY, this.lastZ);
-    }
-
-    /**
-     * Sets previous block type id
-     * 
-     * @param type
-     */
-    public void setLastBlock(final int type)
-    {
-        if (this.getLastBlock() != null)
-        {
-            this.world.getBlockAt(this.lastX, this.lastY, this.lastZ).setTypeId(type);
-        }
     }
 }

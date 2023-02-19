@@ -9,6 +9,7 @@ import java.util.TreeMap;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 
@@ -21,11 +22,11 @@ public class PortManager
     private static TreeMap<Integer, PortContainer> ports = new TreeMap<Integer, PortContainer>();
     private static HashMap<String, Port> reference = new HashMap<String, Port>();
     private static PortTick portTick;
-    public static int TICKETID;
+    public static Material TICKET = Material.LEATHER;
     public static int CONTAINER_SIZE;
     public static int CHECK_INTERVAL;
     public static int PORT_TICK_SPEED;
-    public static int BUTTON_BLOCK_ID;
+    public static Material BUTTON_BLOCK = Material.REDSTONE_ORE;
     public static byte BUTTON_BLOCK_DATA;
     private static final double CONFIG_VERSION = 2.027;
     //
@@ -226,10 +227,11 @@ public class PortManager
                     {
                         continue;
                     }
-                    if (str.startsWith("PortTicketID"))
-                    {
-                        PortManager.TICKETID = Integer.parseInt(str.split(":")[1]);
-                    }
+                    // TODO set ticket from configuration
+//                    if (str.startsWith("PortTicketID"))
+//                    {
+//                        PortManager.TICKET = Integer.parseInt(str.split(":")[1]);
+//                    }
                     if (str.startsWith("ContainerBlockSize"))
                     {
                         PortManager.CONTAINER_SIZE = Integer.parseInt(str.split(":")[1]);
@@ -251,7 +253,7 @@ public class PortManager
                     if (str.startsWith("PortButtonTrigerBlockID"))
                     {
                         final String[] spli = str.split(":")[1].split("-");
-                        PortManager.BUTTON_BLOCK_ID = Integer.parseInt(spli[0]);
+                        //PortManager.BUTTON_BLOCK = Integer.parseInt(spli[0]);
                         PortManager.BUTTON_BLOCK_DATA = Byte.parseByte(spli[1]);
                     }
                 }

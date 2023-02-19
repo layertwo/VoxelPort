@@ -2,6 +2,7 @@ package com.thevoxelbox.voxelport;
 
 import java.util.HashMap;
 
+import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -47,7 +48,7 @@ public class PortListener implements Listener
         {
             return;
         }
-        if (event.getClickedBlock().getTypeId() == 77)
+        if (event.getClickedBlock().getType() == Material.STONE_BUTTON)
         {
 
             final int i1 = event.getClickedBlock().getData();
@@ -70,7 +71,7 @@ public class PortListener implements Listener
                 tarBlock = event.getClickedBlock().getRelative(0, -1, 0);
             }
 
-            if ((tarBlock != null) && (tarBlock.getTypeId() == PortManager.BUTTON_BLOCK_ID))
+            if ((tarBlock != null) && (tarBlock.getType() == PortManager.BUTTON_BLOCK))
             {
                 if (tarBlock.getData() == PortManager.BUTTON_BLOCK_DATA)
                 {
