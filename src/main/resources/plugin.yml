@@ -3,6 +3,7 @@ main: com.thevoxelbox.voxelport.VoxelPort
 version: 3.0
 website: http://www.voxelwiki.com/minecraft/index.php/VoxelPort
 author: przerwap
+api-version: 1.19
 description: >
              Simulates real world travel.
 commands:

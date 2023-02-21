@@ -37,7 +37,7 @@ public class PortContainer
         {
             return;
         }
-        if (player.getInventory().getItemInMainHand().getType() == Material.CLAY_BALL)
+        if (player.getInventory().getItemInMainHand().getType() == PortManager.PORT_IGNORE_BLOCK)
         {
             return;
         }
@@ -45,7 +45,7 @@ public class PortContainer
         {
             if (port.insideZone(loc))
             {
-                if ((player.getInventory().getItemInMainHand().getType() == Material.GOLD_INGOT) && player.hasPermission("voxelport.admin"))
+                if ((player.getInventory().getItemInMainHand().getType() == PortManager.ADMIN_BLOCK) && player.hasPermission("voxelport.admin"))
                 {
                     port.instaPort(player, true);
                     return;
@@ -54,7 +54,7 @@ public class PortContainer
                 {
                     final ItemStack i = player.getInventory().getItemInMainHand();
                     // n.turnNpcToPlayer(l);
-                    if (i.getType() == PortManager.TICKET)
+                    if (i.getType() == PortManager.TICKET_BLOCK)
                     {
                         if (port.instant())
                         {
