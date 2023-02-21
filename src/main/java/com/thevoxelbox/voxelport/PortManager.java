@@ -156,35 +156,6 @@ public class PortManager
                     VoxelPort.log.info("Portals loaded! " + PortManager.reference.size() + " portals have been loaded.");
                     PortManager.sortPorts();
                 }
-            } else
-            { // ADD CONVERSION STUFF?
-                f.mkdirs();
-                final File old = new File("VoxelPorts/");
-                if (old.exists())
-                {
-                    final File[] oldPorts = old.listFiles();
-                    for (final File ol : oldPorts)
-                    {
-                        final oldPort op = new oldPort(ol.getName());
-                        try
-                        {
-                            final Port np = new Port(op.zxh, op.zxl, op.zyh, op.zyl, op.zzh, op.zzl, op.r.getWorld().getName(), op.name, op.r, op.t);
-                            np.setDepartures(op.disp);
-                            np.saveData();
-                            PortManager.reference.put(np.getName(), np);
-                            VoxelPort.log.info("Portal \"" + np.getName() + "\" has been successfully converted.");
-                        }
-                        catch (final Exception e)
-                        {
-                            VoxelPort.log.warning("Error while converting old Portals to new.");
-                        }
-                        ol.delete();
-                    }
-                    final File oldn = new File("portal_names");
-                    oldn.delete();
-                    old.delete();
-                    VoxelPort.log.info("Old portal files cleaned up and deleted");
-                }
             }
         }
         catch (final Exception e)
