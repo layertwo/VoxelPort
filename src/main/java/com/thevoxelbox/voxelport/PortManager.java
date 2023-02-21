@@ -11,6 +11,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 
 /**
@@ -22,16 +23,15 @@ public class PortManager
     private static TreeMap<Integer, PortContainer> ports = new TreeMap<Integer, PortContainer>();
     private static HashMap<String, Port> reference = new HashMap<String, Port>();
     private static PortTick portTick;
-    public static Material TICKET = Material.LEATHER;
+    public static Material TICKET_BLOCK;
+    public static Material ADMIN_BLOCK;
+    public static Material PORT_IGNORE_BLOCK;
+    public static Material BUTTON_BLOCK;
+    public static byte BUTTON_BLOCK_DATA;
     public static int CONTAINER_SIZE;
     public static int CHECK_INTERVAL;
     public static int PORT_TICK_SPEED;
-    public static Material BUTTON_BLOCK = Material.REDSTONE_ORE;
-    public static byte BUTTON_BLOCK_DATA;
-    private static final double CONFIG_VERSION = 2.027;
-    //
     private static HashMap<String, PortData> data = new HashMap<String, PortData>();
-    //
     private static VoxelPort plugin;
 
     public PortManager(final VoxelPort vp)
@@ -94,10 +94,10 @@ public class PortManager
         }
         if (PortManager.ports.isEmpty())
         {
-            VoxelPort.log.warning("[VoxelPort] Portals have not been sorted.");
+            VoxelPort.log.warning("Portals have not been sorted.");
         } else
         {
-            VoxelPort.log.info("[VoxelPort] Portal zones have been sorted into " + PortManager.ports.size() + " containers.");
+            VoxelPort.log.info("Portal zones have been sorted into " + PortManager.ports.size() + " containers.");
         }
     }
 
@@ -160,123 +160,33 @@ public class PortManager
         }
         catch (final Exception e)
         {
-            VoxelPort.log.warning("[VoxelPort] Error while loading VoxelPorts");
+            VoxelPort.log.warning("Error while loading VoxelPorts");
             e.printStackTrace();
         }
     }
 
-    private static void loadConfig()
-    {
-        final File f = new File("plugins/VoxelPort/VoxelPortConfig.txt");
-        try(Scanner snr = new Scanner(f))
-        {
-            if (f.exists())
-            {
-                if (snr.hasNext())
-                {
-                    final String nl = snr.nextLine();
-                    if (nl.contains("version."))
-                    {
-                        final double v = Double.parseDouble(nl.split("version.")[1]);
-                        if (v != PortManager.CONFIG_VERSION)
-                        {
-                            VoxelPort.log.info("[VoxelPort] Updating Config file");
-                            PortManager.saveConfig();
-                            return;
-                        }
-                    } else
-                    {
-                        VoxelPort.log.info("[VoxelPort] Updating Config file");
-                        PortManager.saveConfig();
-                        return;
-                    }
-                }
-                while (snr.hasNext())
-                {
-                    final String str = snr.nextLine();
-                    if (str.startsWith("#"))
-                    {
-                        continue;
-                    }
-                    // TODO set ticket from configuration
-//                    if (str.startsWith("PortTicketID"))
-//                    {
-//                        PortManager.TICKET = Integer.parseInt(str.split(":")[1]);
-//                    }
-                    if (str.startsWith("ContainerBlockSize"))
-                    {
-                        PortManager.CONTAINER_SIZE = Integer.parseInt(str.split(":")[1]);
-                        VoxelPort.log.info("[VoxelPort] ContainerSize set to " + PortManager.CONTAINER_SIZE);
-                    }
-                    if (str.startsWith("WalkingUpdateInterval"))
-                    {
-                        PortManager.CHECK_INTERVAL = Integer.parseInt(str.split(":")[1]);
-                    }
-                    if (str.startsWith("PortTickMillisecond"))
-                    {
-                        PortManager.PORT_TICK_SPEED = Integer.parseInt(str.split(":")[1]);
-                        if ((PortManager.PORT_TICK_SPEED % 50) != 0)
-                        {
-                            PortManager.plugin.onDisable();
-                            throw new IllegalArgumentException("PortTickSpeed set to an invalid value!");
-                        }
-                    }
-//                    if (str.startsWith("PortButtonTrigerBlockID"))
-//                    {
-//                        final String[] spli = str.split(":")[1].split("-");
-//                        //PortManager.BUTTON_BLOCK = Integer.parseInt(spli[0]);
-//                        PortManager.BUTTON_BLOCK_DATA = Byte.parseByte(spli[1]);
-//                    }
-                }
-                snr.close();
-                VoxelPort.log.info("[VoxelPort] Config loaded");
-            } else
-            {
-                VoxelPort.log.warning("[VoxelPort] Config file not found!");
-                PortManager.saveConfig();
-            }
+    private static void loadConfig() {
+        PortManager.plugin.saveDefaultConfig();
+        final FileConfiguration config = PortManager.plugin.getConfig();
+        // TODO handle exception where material does not exist
+        PortManager.TICKET_BLOCK = Material.matchMaterial(config.getString("ticket-material"));
+        PortManager.ADMIN_BLOCK = Material.matchMaterial(config.getString("admin-ticket-material"));
+        PortManager.PORT_IGNORE_BLOCK = Material.matchMaterial(config.getString("port-ignore-material"));
+        PortManager.BUTTON_BLOCK = Material.matchMaterial(config.getString("button-trigger-block"));
+        PortManager.CONTAINER_SIZE = config.getInt("container-block-size");
+        PortManager.CHECK_INTERVAL = config.getInt("walking-update-interval");
+        PortManager.PORT_TICK_SPEED = config.getInt("port-tick-speed");
+        if ((PortManager.PORT_TICK_SPEED % 50) != 0) {
+            PortManager.plugin.onDisable();
+            throw new IllegalArgumentException("port-tick-speed set to an invalid value!");
         }
-        catch (final Exception e)
-        {
-            VoxelPort.log.warning("[VoxelPort] Error while loading VoxelPortConfig.txt");
-            e.printStackTrace();
-        }
-    }
-
-    public static void saveConfig()
-    {
-        try
-        {
-            final File f = new File("plugins/VoxelPort/VoxelPortConfig.txt");
-
-            f.getParentFile().mkdirs();
-            f.createNewFile();
-            final PrintWriter pw = new PrintWriter(f);
-
-            pw.write("#VoxelPort config file. version." + PortManager.CONFIG_VERSION + "\r\n");
-            pw.write("#Edit the values on the right to adjust them to your liking\r\n");
-            pw.write("#The names depict exactly what each field represents\r\n");
-            pw.write("#\r\n");
-            pw.write("PortTicketID:334\r\n");
-            pw.write("ContainerBlockSize:100\r\n");
-            pw.write("WalkingUpdateInterval:2000\r\n");
-            pw.write("PortTickMillisecond:5000\r\n");
-            pw.write("PortButtonTrigerBlockID:73-4\r\n");
-            pw.write("#\r\n");
-            pw.write("#PortTickMilliseconds is the speed at which VoxelPort runs, or checks active Tickets.\r\n");
-            pw.write("#Its required for this value to be a multiple of 50ms because 50ms == 1 CodeTime\r\n");
-            pw.write("#PortButtonTrigerBlockID is the ID and Data value of the block that the button sits on\r\n");
-
-            pw.close();
-            VoxelPort.log.info("[VoxelPort] Config saved");
-            PortManager.loadConfig();
-
-        }
-        catch (final Exception e)
-        {
-            VoxelPort.log.warning("[VoxelPort] Error while saving VoxelPortConfig.txt");
-            e.printStackTrace();
-        }
+        VoxelPort.log.info("TICKET_BLOCK set to " + PortManager.TICKET_BLOCK.name());
+        VoxelPort.log.info("ADMIN_TICKET_BLOCK set to " + PortManager.ADMIN_BLOCK.name());
+        VoxelPort.log.info("PORT_IGNORE_BLOCK set to " + PortManager.PORT_IGNORE_BLOCK.name());
+        VoxelPort.log.info("BUTTON_BLOCK set to " + PortManager.BUTTON_BLOCK.name());
+        VoxelPort.log.info("CONTAINER_SIZE set to " + PortManager.CONTAINER_SIZE);
+        VoxelPort.log.info("CHECK_INTERVAL set to " + PortManager.CHECK_INTERVAL);
+        VoxelPort.log.info("PORT_TICK_SPEED set to " + PortManager.PORT_TICK_SPEED);
     }
 
     public void manageCommand(final Player player, final String[] args)

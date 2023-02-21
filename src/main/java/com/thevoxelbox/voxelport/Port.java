@@ -503,11 +503,11 @@ public class Port
             data.writeBoolean(this.requireTicket);
 
             data.close();
-            VoxelPort.log.info("[VoxelPort] Portal \"" + this.portalName + "\" saved.");
+            VoxelPort.log.info("Portal \"" + this.portalName + "\" saved.");
         }
         catch (final IOException e)
         {
-            VoxelPort.log.warning("[VoxelPort] Error while saving portal \"" + this.portalName + "\"");
+            VoxelPort.log.warning("Error while saving portal \"" + this.portalName + "\"");
             e.printStackTrace();
         }
     }
@@ -591,7 +591,7 @@ public class Port
             }
             catch (final IOException e)
             {
-                VoxelPort.log.warning("[VoxelPort] Invalid File. \"" + this.portalName + "\" is not a VoxelPort or is corrupted.");
+                VoxelPort.log.warning("Invalid File. \"" + this.portalName + "\" is not a VoxelPort or is corrupted.");
                 e.printStackTrace();
             }
         }

@@ -1,0 +1,7 @@
+ticket-material: leather
+admin-ticket-material: gold_ingot
+port-ignore-material: clay_ball
+button-trigger-block: redstone_ore
+container-block-size: 100
+walking-update-interval: 2000
+port-tick-speed: 5000

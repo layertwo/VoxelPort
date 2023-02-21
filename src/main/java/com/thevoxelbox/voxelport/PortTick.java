@@ -97,7 +97,7 @@ public class PortTick implements Runnable
         }
         catch (final Exception e)
         {
-            VoxelPort.log.warning("[VoxelPort] Error occurred in the PortTick Thread");
+            VoxelPort.log.warning("Error occurred in the PortTick Thread");
             e.printStackTrace();
         }
     }
