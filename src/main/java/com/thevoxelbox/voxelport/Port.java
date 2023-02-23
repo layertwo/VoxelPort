@@ -454,7 +454,6 @@ public class Port
             {
                 data.writeByte(2);
                 data.writeUTF(this.arrivalLocation.getWorld().getName());
-                data.writeUTF(this.arrivalLocation.getWorld().getEnvironment().name());
                 data.writeDouble(this.arrivalLocation.getX());
                 data.writeDouble(this.arrivalLocation.getY());
                 data.writeDouble(this.arrivalLocation.getZ());
@@ -465,7 +464,6 @@ public class Port
             {
                 data.writeByte(3);
                 data.writeUTF(this.departLocation.getWorld().getName());
-                data.writeUTF(this.departLocation.getWorld().getEnvironment().name());
                 data.writeDouble(this.departLocation.getX());
                 data.writeDouble(this.departLocation.getY());
                 data.writeDouble(this.departLocation.getZ());
@@ -476,7 +474,6 @@ public class Port
             {
                 data.writeByte(9);
                 data.writeUTF(this.redstoneKey.getWorld().getName());
-                data.writeUTF(this.redstoneKey.getWorld().getEnvironment().name());
                 data.writeDouble(this.redstoneKey.getX());
                 data.writeDouble(this.redstoneKey.getY());
                 data.writeDouble(this.redstoneKey.getZ());
