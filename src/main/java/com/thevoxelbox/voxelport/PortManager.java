@@ -1,9 +1,9 @@
 package com.thevoxelbox.voxelport;
 
 import java.io.File;
-import java.io.PrintWriter;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.HashMap;
-import java.util.Scanner;
 import java.util.TreeMap;
 
 import org.bukkit.Bukkit;
@@ -136,13 +136,15 @@ public class PortManager
     {
         try
         {
-            final File f = new File("plugins/VoxelPort/Ports");
+            final Path path = Paths.get(String.valueOf(VoxelPort.voxelPort.getDataFolder()), "ports");
+            final File f = path.toFile();
             if (f.exists())
             {
-                final File[] portfiles = f.listFiles();
-                for (final File file : portfiles)
+                final File[] portFiles = f.listFiles();
+                for (final File file : portFiles)
                 {
-                    final Port newport = new Port(file.getName());
+                    final String baseName = file.getName().split("\\.")[0];
+                    final Port newport = new Port(baseName);
                     if (newport.loaded())
                     {
                         PortManager.reference.put(newport.getName(), newport);
@@ -306,7 +308,7 @@ public class PortManager
             np.genZoneBoundKeys();
 
             PortManager.reference.put(np.getName(), np);
-            player.sendMessage(ChatColor.BLUE + "Portal \"" + np.getName() + "\" created succesfully.");
+            player.sendMessage(ChatColor.BLUE + "Portal \"" + np.getName() + "\" created successfully.");
             return;
         }
         /*
@@ -760,7 +762,8 @@ public class PortManager
                 return;
             } else
             {
-                final File port = new File("plugins/VoxelPort/Ports/" + newPort.getName());
+                final Path path = Paths.get(String.valueOf(VoxelPort.voxelPort.getDataFolder()), "ports", newPort.getName());
+                final File port = path.toFile();
                 if (PortTick.tickets.containsValue(newPort))
                 {
                     PortTick.removeTicketsFor(newPort.getName());

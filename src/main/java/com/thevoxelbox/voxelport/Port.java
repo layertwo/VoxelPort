@@ -1,20 +1,19 @@
 package com.thevoxelbox.voxelport;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.EOFException;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.TreeSet;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.World;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerTeleportEvent.TeleportCause;
 
@@ -441,65 +440,60 @@ public class Port
     {
         try
         {
-            final File f = new File("plugins/VoxelPort/Ports/" + this.portalName);
+            final Path path = Paths.get(String.valueOf(VoxelPort.voxelPort.getDataFolder()), "ports", this.portalName + ".yml");
+            final File f = path.toFile();
             if (!f.getParentFile().isDirectory())
             {
                 f.mkdirs();
             }
-            final FileOutputStream file = new FileOutputStream(f);
-            final DataOutputStream data = new DataOutputStream(file);
-            data.writeByte(1);
-            this.portalZone.save(data);
+            final YamlConfiguration portConfig = new YamlConfiguration();
+            if (this.portalZone != null) {
+                portConfig.set("zone.world", this.portalZone.world);
+                portConfig.set("zone.high_x", this.portalZone.zonehighx);
+                portConfig.set("zone.high_y", this.portalZone.zonehighy);
+                portConfig.set("zone.high_z", this.portalZone.zonehighz);
+
+                portConfig.set("zone.low_x", this.portalZone.zonelowx);
+                portConfig.set("zone.low_y", this.portalZone.zonelowy);
+                portConfig.set("zone.low_z", this.portalZone.zonelowz);
+            }
             if (this.arrivalLocation != null)
             {
-                data.writeByte(2);
-                data.writeUTF(this.arrivalLocation.getWorld().getName());
-                data.writeDouble(this.arrivalLocation.getX());
-                data.writeDouble(this.arrivalLocation.getY());
-                data.writeDouble(this.arrivalLocation.getZ());
-                data.writeFloat(this.arrivalLocation.getYaw());
-                data.writeFloat(this.arrivalLocation.getPitch());
+                portConfig.set("arrival.world", this.arrivalLocation.getWorld().getName());
+                portConfig.set("arrival.x", this.arrivalLocation.getX());
+                portConfig.set("arrival.y", this.arrivalLocation.getY());
+                portConfig.set("arrival.z", this.arrivalLocation.getZ());
+                portConfig.set("arrival.yaw", this.arrivalLocation.getYaw());
+                portConfig.set("arrival.pitch", this.arrivalLocation.getPitch());
             }
             if (this.departLocation != null)
             {
-                data.writeByte(3);
-                data.writeUTF(this.departLocation.getWorld().getName());
-                data.writeDouble(this.departLocation.getX());
-                data.writeDouble(this.departLocation.getY());
-                data.writeDouble(this.departLocation.getZ());
-                data.writeFloat(this.departLocation.getYaw());
-                data.writeFloat(this.departLocation.getPitch());
+                portConfig.set("depart.world", this.departLocation.getWorld().getName());
+                portConfig.set("depart.x", this.departLocation.getX());
+                portConfig.set("depart.y", this.departLocation.getY());
+                portConfig.set("depart.z", this.departLocation.getZ());
+                portConfig.set("depart.yaw", this.departLocation.getYaw());
+                portConfig.set("depart.pitch", this.departLocation.getPitch());
             }
             if (this.redstoneKey != null)
             {
-                data.writeByte(9);
-                data.writeUTF(this.redstoneKey.getWorld().getName());
-                data.writeDouble(this.redstoneKey.getX());
-                data.writeDouble(this.redstoneKey.getY());
-                data.writeDouble(this.redstoneKey.getZ());
+                portConfig.set("redstone.world", this.redstoneKey.getWorld().getName());
+                portConfig.set("redstone.x", this.redstoneKey.getX());
+                portConfig.set("redstone.y", this.redstoneKey.getY());
+                portConfig.set("redstone.z", this.redstoneKey.getZ());
             }
             if (!this.departures.isEmpty())
             {
-                for (final int dep : this.departures)
-                {
-                    data.writeByte(4);
-                    data.writeInt(dep);
-                }
+                portConfig.set("departures", this.departures);
             }
             if (!this.welcomeMessages.isEmpty())
             {
-                for (final String string : this.welcomeMessages)
-                {
-                    data.writeByte(5);
-                    data.writeUTF(string);
-                }
+                portConfig.set("welcome", this.welcomeMessages);
             }
 
-            data.writeByte(6);
-            data.writeBoolean(this.instant);
-            data.writeBoolean(this.requireTicket);
-
-            data.close();
+            portConfig.set("instant", this.instant);
+            portConfig.set("require_ticket", this.requireTicket);
+            portConfig.save(f);
             VoxelPort.log.info("Portal \"" + this.portalName + "\" saved.");
         }
         catch (final IOException e)
@@ -511,87 +505,66 @@ public class Port
 
     private void readData()
     {
-        if (new File("plugins/VoxelPort/Ports/" + this.portalName).exists())
+        final Path path = Paths.get(String.valueOf(VoxelPort.voxelPort.getDataFolder()), "ports", this.portalName + ".yml");
+        final File portFile = path.toFile();
+        if (portFile.exists())
         {
-            try
-            {
-                final FileInputStream file = new FileInputStream(new File("plugins/VoxelPort/Ports/" + this.portalName));
-                final DataInputStream data = new DataInputStream(file);
-                try
-                {
-                    while (true)
-                    {
-                        final byte by = data.readByte();
-                        if (by == 1)
-                        {
-                            this.portalZone = new Zone(data);
-                        }
-                        if (by == 2)
-                        {
-                            final String wName = data.readUTF();
-                            final World world = Bukkit.getWorld(wName);
-                            final double wx = data.readDouble();
-                            final double wy = data.readDouble();
-                            final double wz = data.readDouble();
-                            final float wYaw = data.readFloat();
-                            final float wPitch = data.readFloat();
-                            // VoxelPort.log.info("VoxelPort " + getName() +
-                            // ", world: " + wName);
-                            this.arrivalLocation = new Location(world, wx, wy, wz, wYaw, wPitch);
-                        }
-                        if (by == 3)
-                        {
-                            final String wName = data.readUTF();
-                            final World world = Bukkit.getWorld(wName);
-                            final double wx = data.readDouble();
-                            final double wy = data.readDouble();
-                            final double wz = data.readDouble();
-                            final float wYaw = data.readFloat();
-                            final float wPitch = data.readFloat();
-                            // VoxelPort.log.info("VoxelPort " + getName() +
-                            // ", world: " + wName);
-                            this.departLocation = new Location(world, wx, wy, wz, wYaw, wPitch);
-                        }
-                        if (by == 9)
-                        {
-                            final String wName = data.readUTF();
-                            final World world = Bukkit.getWorld(wName);
-                            final double wx = data.readDouble();
-                            final double wy = data.readDouble();
-                            final double wz = data.readDouble();
-                            final float wYaw = 0;
-                            final float wPitch = 0;
-                            // VoxelPort.log.info("VoxelPort " + getName() +
-                            // ", world: " + wName);
-                            this.redstoneKey = new Location(world, wx, wy, wz, wYaw, wPitch);
-                        }
-                        if (by == 4)
-                        {
-                            this.departures.add(data.readInt());
-                        }
-                        if (by == 5)
-                        {
-                            this.welcomeMessages.add(data.readUTF());
-                        }
-                        if (by == 6)
-                        {
-                            this.instant = data.readBoolean();
-                            this.requireTicket = data.readBoolean();
-                        }
-                    }
+                final YamlConfiguration portConfig = YamlConfiguration.loadConfiguration(portFile);
+
+                if (portConfig.contains("zone")) {
+                    final World world = Bukkit.getWorld(portConfig.getString("zone.world"));
+                    final int highX = portConfig.getInt("zone.high_x");
+                    final int highY = portConfig.getInt("zone.high_y");
+                    final int highZ = portConfig.getInt("zone.high_z");
+
+                    final int lowX = portConfig.getInt("zone.low_x");
+                    final int lowY = portConfig.getInt("zone.low_y");
+                    final int lowZ = portConfig.getInt("zone.low_z");
+
+                    this.portalZone = new Zone(highX, lowX, highY, lowY, highZ, lowZ, world.getName(), world.getEnvironment());
                 }
-                catch (final EOFException eof)
-                {
-                    data.close();
-                    this.loaded = true;
+
+                if (portConfig.contains("arrival")) {
+                    final World world = Bukkit.getWorld(portConfig.getString("arrival.world"));
+                    final double wx = portConfig.getDouble("arrival.x");
+                    final double wy = portConfig.getDouble("arrival.y");
+                    final double wz = portConfig.getDouble("arrival.z");
+                    final float wYaw = (float) portConfig.getDouble("arrival.yaw");
+                    final float wPitch = (float) portConfig.getDouble("arrival.pitch");
+
+                    this.arrivalLocation = new Location(world, wx, wy, wz, wYaw, wPitch);
                 }
+
+                if (portConfig.contains("depart")) {
+                    final World world = Bukkit.getWorld(portConfig.getString("depart.world"));
+                    final double wx = portConfig.getDouble("depart.x");
+                    final double wy = portConfig.getDouble("depart.y");
+                    final double wz = portConfig.getDouble("depart.z");
+                    final float wYaw = (float) portConfig.getDouble("depart.yaw");
+                    final float wPitch = (float) portConfig.getDouble("depart.pitch");
+
+                    this.departLocation = new Location(world, wx, wy, wz, wYaw, wPitch);
+                }
+
+                if (portConfig.contains("redstone")) {
+                    final World world = Bukkit.getWorld(portConfig.getString("redstone.world"));
+                    final double wx = portConfig.getDouble("redstone.x");
+                    final double wy = portConfig.getDouble("redstone.y");
+                    final double wz = portConfig.getDouble("redstone.z");
+
+                    this.redstoneKey = new Location(world, wx, wy, wz, 0, 0);
+                }
+
+                final List<Integer> departureList = portConfig.getIntegerList("departures");
+                this.departures.addAll(new TreeSet<Integer>(departureList));
+
+                final List<String> welcomeList = portConfig.getStringList("welcome");
+                this.welcomeMessages.addAll(new TreeSet<String>(welcomeList));
+
+                this.instant = portConfig.getBoolean("instant", false);
+                this.requireTicket = portConfig.getBoolean("require_ticket", false);
+                this.loaded = true;
             }
-            catch (final IOException e)
-            {
-                VoxelPort.log.warning("Invalid File. \"" + this.portalName + "\" is not a VoxelPort or is corrupted.");
-                e.printStackTrace();
-            }
-        }
     }
 
     public boolean loaded()
